@@ -12,8 +12,8 @@
     "preview": "vite preview",
     "test:unit": "node scripts/vitest.mjs",
     "prepare": "cypress install",
-    "test:e2e": "start-server-and-test 'vite preview --host 0.0.0.0 --port 4173' http://127.0.0.1:4173 'cypress run --e2e'",
-    "test:e2e:dev": "start-server-and-test 'vite dev --host 0.0.0.0 --port 4173' http://127.0.0.1:4173 'cypress run --e2e'",
+    "test:e2e": "start-server-and-test 'vite preview --host 127.0.0.1 --port 4173' http://127.0.0.1:4173 'cypress run --e2e'",
+    "test:e2e:dev": "start-server-and-test 'vite dev --host 127.0.0.1 --port 4173' http://127.0.0.1:4173 'cypress run --e2e'",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache"

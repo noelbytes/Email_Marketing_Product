@@ -87,7 +87,7 @@ router.beforeEach(async (to) => {
   if (!auth.isAuthenticated && getAuthToken()) {
     try {
       await auth.loadProfile()
-    } catch (error) {
+    } catch {
       auth.logout()
     }
   }

@@ -6,6 +6,8 @@ import presetNewsletterModule from 'grapesjs-preset-newsletter'
 import blocksBasicModule from 'grapesjs-blocks-basic'
 import { http, ApiError } from '@/lib/httpClient'
 
+type GrapesPlugin = (editor: Editor, opts?: Record<string, unknown>) => void
+
 type Template = {
   id: number
   name: string
@@ -77,9 +79,9 @@ function loadIntoEditor(template: Template) {
   if (!editor) return
   editor.setComponents('')
   editor.setStyle('')
-  const projectData = template.project_data as any
+  const projectData = template.project_data
   if (projectData && typeof projectData === 'object') {
-    editor.loadProjectData(projectData)
+    editor.loadProjectData(projectData as Record<string, unknown>)
     return
   }
   editor.setComponents(template.html || '')
@@ -160,8 +162,17 @@ function ensureEditor() {
   builderError.value = null
   editorReady.value = false
   try {
-    const presetNewsletter: any = (presetNewsletterModule as any)?.default ?? presetNewsletterModule
-    const blocksBasic: any = (blocksBasicModule as any)?.default ?? blocksBasicModule
+    const normalizePlugin = (module: unknown): GrapesPlugin => {
+      if (typeof module === 'function') return module as GrapesPlugin
+      if (module && typeof module === 'object' && 'default' in module) {
+        const def = (module as { default?: unknown }).default
+        if (typeof def === 'function') return def as GrapesPlugin
+      }
+      throw new Error('Invalid GrapesJS plugin module')
+    }
+
+    const presetNewsletter = normalizePlugin(presetNewsletterModule as unknown)
+    const blocksBasic = normalizePlugin(blocksBasicModule as unknown)
 
     editor = grapesjs.init({
       container: editorEl.value,

@@ -1,0 +1,26 @@
+@import './base.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply min-h-screen bg-[#f8f4ff] text-slate-900 antialiased;
+}
+
+#app {
+  @apply min-h-screen;
+}
+
+/* GrapesJS: make the editor responsive inside app shells */
+.gjs-editor-cont {
+  width: 100% !important;
+}
+
+.gjs-editor {
+  min-width: 0 !important;
+}
+
+.gjs-pn-panels {
+  max-width: 100%;
+}

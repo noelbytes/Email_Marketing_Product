@@ -1,0 +1,26 @@
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Python / backend
+.venv/
+backend/.venv/
+backend/*.db
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+dist/
+build/
+
+# Environment & tooling
+.env
+backend/.env
+.DS_Store
+coverage.xml
+*.log
+
+# Cypress
+frontend/cypress/screenshots/
+frontend/cypress/videos/

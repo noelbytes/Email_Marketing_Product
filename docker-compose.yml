@@ -1,0 +1,93 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend-api
+
+  backend-api:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env.example
+    environment:
+      - DATABASE_URL=postgresql+psycopg://marketing:marketing@db:5432/email_marketing
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - API_KEYS=dev-internal-key
+      - RUN_MIGRATIONS=1
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+    command: flask --app email_marketing_backend.app run --host 0.0.0.0 --port 8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+      - redis
+      - mailhog
+      - minio
+
+  worker:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env.example
+    command: celery -A email_marketing_backend.celery_app worker -l info
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - backend-api
+      - redis
+    environment:
+      - API_KEYS=dev-internal-key
+      - RUN_MIGRATIONS=0
+    user: "1000:1000"
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: email_marketing
+      POSTGRES_USER: marketing
+      POSTGRES_PASSWORD: marketing
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: redis:7
+    ports:
+      - '6379:6379'
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+volumes:
+  db_data:
+  minio_data:
